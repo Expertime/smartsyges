@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name       SmartSyges
 // @namespace  http://www.expertime.com/
-// @version    0.1
+// @version    0.2
 // @description  SmartSyges
 // @match      https://gestion.expertime.com/sygesweb/*
 // @copyright  2015+, M.TUDURY
@@ -17,6 +17,7 @@ smartsyges.init = function () {
     if ($('form[name="TEM_SA_SAISIEMENSUELLE"]').length > 0) {
         $('#tzLIB_INFPAG').html('<button id="smartsyges_launcher">Launch Smart Frame</button>');
         $('#smartsyges_launcher').click(smartsyges.startframe);
+        smartsyges.colorize();
     }
 }
 
@@ -63,6 +64,26 @@ smartsyges.startframe = function() {
     $('.smartsygesall').click(smartsyges.allDays);
     
     return false;
+}
+
+smartsyges.colorize = function () {
+    $('input[name$="_AVA_ACTSAI"]').each(function (index, item) { 
+        $(item).css('background-color', smartsyges.colors[index]);
+
+
+    });
+    var cnt = 1;
+    $('.CSS-LibTitreJourZoneRepetee').each(function (index, td) {
+        var std = $(td);
+        smartsyges.fields[cnt] = std;
+        if (std.attr('width') > 10) {
+            std.attr('data-day', cnt);
+            if ((std.css('background-color') != 'rgb(212, 212, 212)')&&($('#dzLIB_ABSD'+smartsyges.padDay(cnt)).css('visibility')=='hidden')) {
+                smartsyges.opendays.push(cnt);
+            }
+            cnt++;
+        }
+    });
 }
 
 smartsyges.loadDatas = function () {
@@ -159,6 +180,8 @@ smartsyges.colors = ['#00FF00', '#FF0000', '#0000FF', '#00FFFF', '#FFFF00', '#FF
 
 smartsyges.data = [];
 smartsyges.opendays = [];
+
+smartsyges.fields = [];
 
 // construct help div or hide it
 smartsyges.helpme = function() {
