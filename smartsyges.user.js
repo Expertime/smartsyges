@@ -15,8 +15,9 @@ var smartsyges = smartsyges || {};
 // add smart frame button
 smartsyges.init = function () {
     if ($('form[name="TEM_SA_SAISIEMENSUELLE"]').length > 0) {
-        $('#tzLIB_INFPAG').html('<button id="smartsyges_launcher">Launch Smart Frame</button>');
-        $('#smartsyges_launcher').click(smartsyges.startframe);
+        // Old smartsyges : not so good one
+        //$('#tzLIB_INFPAG').html('<button id="smartsyges_launcher">Launch Smart Frame</button>');
+        //$('#smartsyges_launcher').click(smartsyges.startframe);
         smartsyges.colorize();
     }
 }
@@ -69,9 +70,11 @@ smartsyges.startframe = function() {
 smartsyges.colorize = function () {
     $('input[name$="_AVA_ACTSAI"]').each(function (index, item) { 
         $(item).css('background-color', smartsyges.colors[index]);
-
-
+        if (smartsyges.countcontracts < index)
+            smartsyges.countcontracts = index;
     });
+    smartsyges.countcontracts=smartsyges.countcontracts+2;
+    //alert(smartsyges.countcontracts);
     var cnt = 1;
     $('.CSS-LibTitreJourZoneRepetee').each(function (index, td) {
         var std = $(td);
@@ -84,6 +87,31 @@ smartsyges.colorize = function () {
             cnt++;
         }
     });
+    for (var i = 0; i < smartsyges.opendays.length; i++) {
+        var day = smartsyges.opendays[i];
+        var color = [];
+        for (var j = 1; j < smartsyges.countcontracts; j++) {
+            var name = '_' + j + '_AVA_QTES' + smartsyges.padDay(day);
+            var valdays = $('input[name="'+name+'"]').val();
+            if (valdays != '') {
+                color.push(smartsyges.colors[j-1]);
+            }
+        }
+        if (color.length > 0) {
+            if (color.length == 1) {
+                smartsyges.fields[day].css('background-color', color[0]);
+            }
+            if (color.length == 2) {
+                smartsyges.fields[day].css('background', 'linear-gradient(45deg, '+color[0]+', '+color[0]+' 49.9%, '+color[1]+' 50.1%, '+color[1]+' 100%)');
+            }
+            if (color.length == 3) {
+                smartsyges.fields[day].css('background', 'linear-gradient(45deg, '+color[0]+', '+color[0]+' 33.2%, '+color[1]+' 33.4%, '+color[1]+' 66.5%, '+color[2]+' 66.7%, '+color[2]+' 100%)');
+            }
+            if (color.length > 3) {
+                smartsyges.fields[day].css('background', 'linear-gradient(45deg, '+color.join()+')');
+            }
+        }
+    }
 }
 
 smartsyges.loadDatas = function () {
@@ -176,12 +204,14 @@ smartsyges.padDay = function (day) {
    return ((day< 10)?('0'+day):day);
 }
 
-smartsyges.colors = ['#00FF00', '#FF0000', '#0000FF', '#00FFFF', '#FFFF00', '#FF00FF', '#770077', '#777700', '#007777'];
+smartsyges.colors = ['#00FF00', '#FF0000', '#00FFFF', '#FFFF00', '#FF00FF', '#007777', '#777700', '#770077', '#0000FF'];
 
 smartsyges.data = [];
 smartsyges.opendays = [];
 
 smartsyges.fields = [];
+smartsyges.contractsfields = [];
+smartsyges.countcontracts = 0;
 
 // construct help div or hide it
 smartsyges.helpme = function() {
