@@ -16,6 +16,10 @@ var smartsyges = smartsyges || {};
 smartsyges.init = function () {
     if ($('form[name="TEM_SA_SAISIEMENSUELLE"]').length > 0) {
         smartsyges.colorize();
+        smartsyges.autosave();
+    }
+    if ($('form[name="SYW_EC_INFOSUTILISATEUR"]').length > 0) {
+        smartsyges.autovalid();
     }
 }
 
@@ -94,104 +98,29 @@ smartsyges.colorize = function () {
     }
 }
 
-smartsyges.focushelper = function () {
-    var cnt = 1;
-    $('.CSS-LibTitreJourZoneRepetee').each(function (index, td) {
-        var std = $(td);
-        smartsyges.fields[cnt] = std;
-        if (std.attr('width') > 10) {
-            std.attr('data-day', cnt);
-            if ((std.css('background-color') != 'rgb(212, 212, 212)')&&($('#dzLIB_ABSD'+smartsyges.padDay(cnt)).css('visibility')=='hidden')) {
-                smartsyges.opendays.push(cnt);
-            }
-            cnt++;
-        }
-    });
+smartsyges.autosave = function () {
+    window.setTimeout(smartsyges.save, 18000);
 }
-
-smartsyges.loadDatas = function () {
-    var month = $('#CBO_PERSAI option:selected').text();
-    var k = localStorage.getItem('smartsyges_cra_'+month);
-    if (k) {
-        smartsyges.data = JSON.parse(k);
-    }
-}
-
-smartsyges.updateColors = function () {
-    for( var i = 0; i < smartsyges.opendays.length; i++ ) {
-        var id = smartsyges.opendays[i];
-        var ctrl = smartsyges.getData(id);
-        if (ctrl != '') {
-            $('#smartsygesframe table td[data-day="'+id+'"]').css('background-color', smartsyges.colors[ctrl]);
-        }
-    }
-}
-
-smartsyges.allDays = function () {
-    var ctrall = $(this).attr('data-ctr');
-    for( var i = 0; i < smartsyges.opendays.length; i++ ) {
-        var id = smartsyges.opendays[i];
-        smartsyges.updateDayDatas(id, ctrall);
-    }
-    return false;
-}
-
-smartsyges.updateDayDatas = function (id, ctrl) {
-    $('#smartsygesframe table td[data-day="'+id+'"]').css('background-color', smartsyges.colors[ctrl]);
-    smartsyges.updateData($('#CBO_PERSAI option:selected').text(), id, ctrl);
-}
-
-// user clicked a day
-smartsyges.updateDay = function () {
-    var id = $(this).attr('data-day');
-    var ctrsel = $('input[name="smartsygesctrselect"]:checked').val();
-    if (ctrsel != '') {
-        smartsyges.updateDayDatas(id, ctrsel);
-    }
-}
-
-// let's keep data in case session expired in syges
-smartsyges.updateData = function (month, day, ctr) {
-    var updated = false;
-    for (var i = 0; i < smartsyges.data.length; i++) {
-        var data = smartsyges.data[i];
-        if (data.day == day) {
-            data.ctr = ctr;
-            updated = true;
-        }
-    }
-    if (!updated) {
-        smartsyges.data.push({ day: day, ctr: ctr});
-    }
-    localStorage.setItem('smartsyges_cra_'+month, JSON.stringify(smartsyges.data));
-}
-
-smartsyges.getData = function (day) {
-    for (var i = 0; i < smartsyges.data.length; i++) {
-        var data = smartsyges.data[i];
-        if (data.day == day) {
-            return data.ctr;
-        }
-    }
-    return '';
-}
-
-// applique les donnees dans les tableaux de syges et sauve
-smartsyges.savevalue = function () {
-    for (var i = 0; i < smartsyges.data.length; i++) {
-        var data = smartsyges.data[i];
-        var name = '_' + (parseInt(data.ctr) + 1) + '_AVA_QTES' + smartsyges.padDay(data.day);
-        $('input[name="'+name+'"]').val('1');
-    }
-    
-    if ($('#smartsygesframe').length > 0) {
-        var z = $('#smartsygesframe')[0];
-        z.parentNode.removeChild(z);
         
-        // copied from "Enregistrer ligne" button
-        if(_TEM_SA_SAISIEMENSUELLE_SUB()){_JSL(_PAGE_,'BTN_ENRLIG','_self','','')}
-        
-        return false;
+smartsyges.save = function () {
+    try {
+        eval($('a[name="BTN_ENRLIG"]').attr('href'));
+    }
+    catch (e) {
+        console.log('cannot save');
+    }
+}
+
+smartsyges.autovalid = function () {
+    window.setTimeout(smartsyges.infovalid, 5000);
+}
+
+smartsyges.infovalid = function () {
+    try {
+        eval($('a[name="BTN_MO_FERCEL"]').attr('href'));
+    }
+    catch (e) {
+        console.log('cannot valid');
     }
 }
 
@@ -207,20 +136,6 @@ smartsyges.opendays = [];
 smartsyges.fields = [];
 smartsyges.contractsfields = [];
 smartsyges.countcontracts = 0;
-
-// construct help div or hide it
-smartsyges.helpme = function() {
-    if ($('#smartsygesframe').length > 0) {
-        var z = $('#smartsygeshelp')[0];
-        z.parentNode.removeChild(z);
-        return false;
-    }
-    var k = $('#dwwCELTITREZRP');
-    $('<div id="smartsygeshelp" style="position:absolute;left:1;top:85;width:998;height:500;z-index:9999;opacity:0.95;background-color:#eeffee;">Selectionner le contrat ci dessous et cliquez sur le jour du mois<br/>Liste des contrats<div id="smartsygeslistcontrat"></div><br/><table></table><button id="smartsyges_apply">Update Syges</button></div>').insertBefore(k);
-    
-    
-    return false;
-}
 
 
 /* INCLUDE JQUERY */
