@@ -16,7 +16,7 @@ var smartsyges = smartsyges || {};
 smartsyges.init = function () {
     if ($('form[name="TEM_SA_SAISIEMENSUELLE"]').length > 0) {
         smartsyges.colorize();
-        smartsyges.autosave();
+        smartsyges.autosaveinit();
     }
     if ($('form[name="SYW_EC_INFOSUTILISATEUR"]').length > 0) {
         smartsyges.autovalid();
@@ -98,9 +98,25 @@ smartsyges.colorize = function () {
     }
 }
 
-smartsyges.autosave = function () {
-    window.setTimeout(smartsyges.save, 18000);
+smartsyges.autosavecounter = 180;
+smartsyges.autosaveinit = function () {
+    var k = $('#dwwCELTITREZRP');
+    $('<div id="smartsygesautosavecounter" style="position:absolute;left:1;top:60;width:998;height:20;z-index:9999;opacity:0.95;background-color:#eeffee;text-align: center;">autosave...</div>').insertBefore(k);
+
+    window.setTimeout(smartsyges.autosave, 1000);
 }
+
+smartsyges.autosave = function () {
+    smartsyges.autosavecounter--;
+    var k = $('#smartsygesautosavecounter').html('autosave in '+smartsyges.autosavecounter+'s');
+
+    if (smartsyges.autosavecounter>0)
+        window.setTimeout(smartsyges.autosave, 1000);
+    else
+        window.setTimeout(smartsyges.save, 1000);
+}
+
+
         
 smartsyges.save = function () {
     try {
