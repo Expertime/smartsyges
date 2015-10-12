@@ -15,66 +15,20 @@ var smartsyges = smartsyges || {};
 // add smart frame button
 smartsyges.init = function () {
     if ($('form[name="TEM_SA_SAISIEMENSUELLE"]').length > 0) {
-        // Old smartsyges : not so good one
-        //$('#tzLIB_INFPAG').html('<button id="smartsyges_launcher">Launch Smart Frame</button>');
-        //$('#smartsyges_launcher').click(smartsyges.startframe);
         smartsyges.colorize();
     }
 }
 
-// construct div or hide it
-smartsyges.startframe = function() {
-    if ($('#smartsygesframe').length > 0) {
-        var z = $('#smartsygesframe')[0];
-        z.parentNode.removeChild(z);
-        return false;
-    }
-    var k = $('#dwwCELTITREZRP');
-    // contenu de base de la div
-    $('<div id="smartsygesframe" style="position:absolute;left:1;top:85;width:998;height:500;z-index:9999;opacity:0.95;background-color:#eeffee;">Selectionner le contrat ci dessous et cliquez sur le jour du mois<br/>Liste des contrats<div id="smartsygeslistcontrat"></div><br/><table></table><button id="smartsyges_apply">Update Syges</button></div>').insertBefore(k);
-    
-    // copie le tableau des jours
-    $('#smartsygesframe table').html($($('.CSS-LibTitreJourZoneRepetee:first')[0].parentNode).html());
-    
-    // remplis la liste de contrat
-    var lstctrdiv = $('#smartsygeslistcontrat');
-    $('input[name$="_AVA_ACTSAI"]').each(function (index, item) { lstctrdiv.append('<input type="radio" name="smartsygesctrselect" id="smartsygesselect'+index+'" value="'+index+'"><label for="smartsygesselect'+index+'" style="background-color: '+smartsyges.colors[index]+';">' + $(item).val()+'</label><button id="smartsygesctr'+index+'" class="smartsygesall" data-ctr="'+index+'">ALL</button>' +'<br/>'); });
-    
-    var cnt = 1;
-    // rend clickable la zone de calendrier pour gérer l'affectation de contrat
-    $('#smartsygesframe table td').each(function (index, td) { 
-        var std = $(td);
-        if (std.attr('width') > 10) {
-            std.attr('data-day', cnt);
-            if ((std.css('background-color') != 'rgb(212, 212, 212)')&&($('#dzLIB_ABSD'+smartsyges.padDay(cnt)).css('visibility')=='hidden')) {
-                smartsyges.opendays.push(cnt);
-                std.click(smartsyges.updateDay);
-            }
-            else {
-                std.css('background-color', 'rgb(212, 212, 212)');
-            }
-            cnt++;
-        }
-    });
-    
-    smartsyges.loadDatas();
-    smartsyges.updateColors();
-    
-    // ajoute le traitement sur les boutons
-    $('#smartsyges_apply').click(smartsyges.savevalue);
-    $('.smartsygesall').click(smartsyges.allDays);
-    
-    return false;
-}
-
 smartsyges.colorize = function () {
+    //identifie les contrats sur la page + met en couleur les lignes de contrats
     $('input[name$="_AVA_ACTSAI"]').each(function (index, item) { 
         $(item).css('background-color', smartsyges.colors[index]);
         if (smartsyges.countcontracts < index)
             smartsyges.countcontracts = index;
     });
     smartsyges.countcontracts=smartsyges.countcontracts+2;
-    //alert(smartsyges.countcontracts);
+    
+    // identifie les jours ouvrés
     var cnt = 1;
     $('.CSS-LibTitreJourZoneRepetee').each(function (index, td) {
         var std = $(td);
@@ -87,9 +41,17 @@ smartsyges.colorize = function () {
             cnt++;
         }
     });
+    
+    // "colorise" les jours dans l'entete de tableau + si le contenu != 1
     for (var i = 0; i < smartsyges.opendays.length; i++) {
         var day = smartsyges.opendays[i];
         var color = [];
+        
+        var headfield = $('input[name="SIE_TOTJ' + smartsyges.padDay(day) + '"]');
+        if (headfield.val() != '1.00') {
+            headfield.css('background-color', '#FFFF00');
+        }
+        
         for (var j = 1; j < smartsyges.countcontracts; j++) {
             var name = '_' + j + '_AVA_QTES' + smartsyges.padDay(day);
             var valdays = $('input[name="'+name+'"]').val();
@@ -112,6 +74,39 @@ smartsyges.colorize = function () {
             }
         }
     }
+    
+    // "colorise" les cases à ne pas remplir en rouge
+    for (var k = 1; k < 33; k++) {
+        var notopened = true;
+        for (var i = 0; i < smartsyges.opendays.length; i++) {
+            var day = smartsyges.opendays[i];
+            if (k == day)
+                notopened = false;
+        }
+        if (notopened) {
+            for (var j = 1; j < smartsyges.countcontracts; j++) {
+                var name = '_' + j + '_AVA_QTES' + smartsyges.padDay(k);
+                var field = $('input[name="'+name+'"]');
+                if (field.css('background-color')!='rgb(212, 212, 212)')
+                    field.css('background-color', '#E4E4E4');
+            }
+        }
+    }
+}
+
+smartsyges.focushelper = function () {
+    var cnt = 1;
+    $('.CSS-LibTitreJourZoneRepetee').each(function (index, td) {
+        var std = $(td);
+        smartsyges.fields[cnt] = std;
+        if (std.attr('width') > 10) {
+            std.attr('data-day', cnt);
+            if ((std.css('background-color') != 'rgb(212, 212, 212)')&&($('#dzLIB_ABSD'+smartsyges.padDay(cnt)).css('visibility')=='hidden')) {
+                smartsyges.opendays.push(cnt);
+            }
+            cnt++;
+        }
+    });
 }
 
 smartsyges.loadDatas = function () {
