@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name       SmartSyges
 // @namespace  http://www.expertime.com/
-// @version    0.3
 // @description  SmartSyges pour Greasemonkey & Tampermonkey
+// @version    0.4
 // @match      https://gestion.expertime.com/sygesweb/*
 // @copyright  2015+, M.TUDURY
 // @grant       none
@@ -18,6 +18,9 @@ var smartsyges = smartsyges || {};
 smartsyges.init = function () {
     if ($('form[name="TEM_SA_SAISIEMENSUELLE"]').length > 0) {
         smartsyges.colorize();
+        smartsyges.autosaveinit();
+    }
+    if ($('form[name="FRS_SA_FRAISJOURNALIER"]').length > 0) {
         smartsyges.autosaveinit();
     }
     if ($('form[name="SYW_EC_INFOSUTILISATEUR"]').length > 0) {
@@ -103,6 +106,8 @@ smartsyges.colorize = function () {
 smartsyges.autosavecounter = 180;
 smartsyges.autosaveinit = function () {
     var k = $('#dwwCELTITREZRP');
+    if (k.length == 0)
+        k = $('#dwwCELTITZRP');
     $('<div id="smartsygesautosavecounter" style="position:absolute;left:1;top:60;width:998;height:20;z-index:9999;opacity:0.95;background-color:#eeffee;text-align: center;">autosave...</div>').insertBefore(k);
 
     window.setTimeout(smartsyges.autosave, 1000);
