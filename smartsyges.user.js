@@ -2,7 +2,7 @@
 // @name       SmartSyges
 // @namespace  http://www.expertime.com/
 // @description  SmartSyges pour Greasemonkey & Tampermonkey
-// @version    0.4
+// @version    0.5
 // @match      https://gestion.expertime.com/sygesweb/*
 // @copyright  2015+, M.TUDURY (OpenSource, Licence MIT)
 // @grant       none
