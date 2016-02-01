@@ -2,7 +2,7 @@
 // @name       SmartSyges
 // @namespace  http://www.expertime.com/
 // @description  SmartSyges pour Greasemonkey & Tampermonkey
-// @version    0.5
+// @version    0.6
 // @match      https://gestion.expertime.com/sygesweb/*
 // @copyright  2015+, M.TUDURY (OpenSource, Licence MIT)
 // @grant       none
@@ -36,8 +36,10 @@ smartsyges.init = function () {
 smartsyges.colorize = function () {
     //identifie les contrats sur la page + met en couleur les lignes de contrats
     $('input[name$="_AVA_ACTSAI"]').each(function (index, item) { 
-        if (smartsyges.options.cracontractcolor == 1)
+        if (smartsyges.options.cracontractcolor == 1) {
             $(item).css('background-color', smartsyges.colors[index]);
+			$(item).css('color', smartsyges.fontcolors[index]);
+		}
         if (smartsyges.countcontracts < index)
             smartsyges.countcontracts = index;
     });
@@ -61,6 +63,7 @@ smartsyges.colorize = function () {
     for (var i = 0; i < smartsyges.opendays.length; i++) {
         var day = smartsyges.opendays[i];
         var color = [];
+		var fontcolor = [];
 
         if (smartsyges.options.cradiverscolor == 1) {
             var headfield = $('input[name="SIE_TOTJ' + smartsyges.padDay(day) + '"]');
@@ -75,20 +78,25 @@ smartsyges.colorize = function () {
                 var valdays = $('input[name="'+name+'"]').val();
                 if (valdays != '') {
                     color.push(smartsyges.colors[j-1]);
+					fontcolor.push(smartsyges.fontcolors[j-1]);
                 }
             }
             if (color.length > 0) {
                 if (color.length == 1) {
                     smartsyges.fields[day].css('background-color', color[0]);
+					smartsyges.fields[day].css('color', fontcolor[0]);
                 }
                 if (color.length == 2) {
                     smartsyges.fields[day].css('background', 'linear-gradient(45deg, '+color[0]+', '+color[0]+' 49.9%, '+color[1]+' 50.1%, '+color[1]+' 100%)');
+					smartsyges.fields[day].css('color', fontcolor[0]);
                 }
                 if (color.length == 3) {
                     smartsyges.fields[day].css('background', 'linear-gradient(45deg, '+color[0]+', '+color[0]+' 33.2%, '+color[1]+' 33.4%, '+color[1]+' 66.5%, '+color[2]+' 66.7%, '+color[2]+' 100%)');
+					smartsyges.fields[day].css('color', fontcolor[0]);
                 }
                 if (color.length > 3) {
                     smartsyges.fields[day].css('background', 'linear-gradient(45deg, '+color.join()+')');
+					smartsyges.fields[day].css('color', fontcolor[0]);
                 }
             }
         }
@@ -211,6 +219,7 @@ smartsyges.padDay = function (day) {
 }
 
 smartsyges.colors = ['#00FF00', '#FF0000', '#00FFFF', '#FFFF00', '#FF00FF', '#007777', '#777700', '#770077', '#0000FF'];
+smartsyges.fontcolors = ['#000000', '#FFFFFF', '#000000', '#000000', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF'];
 
 smartsyges.data = [];
 smartsyges.opendays = [];
